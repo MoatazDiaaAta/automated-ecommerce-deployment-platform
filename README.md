@@ -1,75 +1,87 @@
-# eCommerce Platform Project
+# ECommerce – Dockerized Application
 
-## Project Overview
-This project involves building a comprehensive eCommerce platform from scratch, utilizing React, Redux for frontend development, and Django with Postgres for the backend. It's designed to simulate a real-world application, providing a robust understanding of full-stack development.
-### User
-![HomePage](./static/images/1.jpg)
-![FirstOut](./static/images/firstout.jpg)
-![Checkout](./static/images/checkout.jpg)
-![User](./static/images/user.jpg)
-### Admin
-![User](./static/images/UserPage.jpg)
-![Products](./static/images/products.jpg)
-![Order](./static/images/orders.jpg)
+This repository contains the ECommerce project, Dockerized and prepared for the deployment phase.
 
+## Project Components
 
-## Features
+- **Frontend:** React application served by Nginx.
+- **Backend:** Django REST API served by Gunicorn.
+- **Database:** PostgreSQL 16 for local development.
+- **Demo Data:** A PostgreSQL database backup containing the existing project data.
 
-### Frontend
-- **React & Redux Integration:** Utilizing React for the UI and Redux for state management.
-- **Responsive Design:** Implementation of a responsive design using React-Bootstrap.
-- **Shopping Cart:** Full-featured shopping cart with session management.
-- **Product Rating & Review:** Allows users to rate and review products.
+## Run the Project Locally
 
-### Backend
-- **Django Framework:** Backend built with Django to manage data and server-side logic.
-- **Postgres Database:** Utilization of Postgres for efficient data storage and retrieval.
-- **RESTful API:** Creation of a RESTful API for frontend-backend communication.
-- **Admin Panel:** An admin interface to manage products, orders, and user data.
+### 1. Clone the Repository
 
-### Payments and Security
-- **Payment Integration:** Integration with PayPal and credit/debit card payments.
-- **JWT Authentication:** Implementation of JSON Web Token for secure user authentication.
+```bash
+git clone https://github.com/MoatazDiaaAta/automated-ecommerce-deployment-platform.git
+cd automated-ecommerce-deployment-platform
+```
 
-## Project Structure
+### 2. Configure Environment Variables
 
-### `frontend/`
-- Contains all React components, Redux actions, and reducers.
-- `components/`: Individual UI components.
-- `pages/`: React components representing full pages.
-- `redux/`: Redux store, actions, and reducers.
+```bash
+cp .env.example .env
+```
 
-### `backend/`
-- Django project and application files.
-- `models/`: Database models.
-- `views/`: Backend logic to process API requests.
-- `urls/`: Endpoint definitions for the API.
+Update `.env` and set a secure `DJANGO_SECRET_KEY`.
 
-## Getting Started
+### 3. Build and Start the Containers
 
-### Prerequisites
-- Node.js
-- Python
-- Django
-- PostgreSQL
+```bash
+docker compose up --build -d
+```
 
-### Installation
-1. Clone the repository:
-   ```bash
-   git clone https://github.com/your-repository/eCommerce-platform.git
-2. Install frontend dependencies
-   ```bash
-   cd frontend
-   npm install
-3. Install backend dependencies
-   ```bash
-    cd backend
-    pip install -r requirements.txt
-4. Start the Django backend server
-   ```bash
-   python manage.py runserver
-5. Start the React frontend
-    ```bash
-    npm start
+### 4. Restore the Demo Database
 
-The application should now be running on localhost:3000.
+The repository includes `backups/sportszone.dump`, a PostgreSQL custom-format backup containing the existing demo data.
+
+Restore it into the local PostgreSQL container:
+
+```bash
+docker compose exec -T db pg_restore -U postgres -d sportszone --no-owner --no-privileges < backups/sportszone.dump
+```
+
+**Important:** Restore the backup into a fresh, empty database. The backup already contains the database schema and data, so do not run migrations before restoring it.
+
+## Application URLs
+
+- **Frontend:** http://localhost:3000
+- **Products API:** http://localhost:3000/api/products/
+- **Users API:** http://localhost:3000/api/users/
+- **Orders API:** http://localhost:3000/api/orders/
+- **Django Admin:** http://localhost:3000/admin/
+
+## Database and Deployment
+
+Docker Compose runs PostgreSQL locally for development.
+
+For production, the application will use **Amazon RDS for PostgreSQL** instead of a PostgreSQL container.
+
+The deployment team should:
+
+1. Create an Amazon RDS PostgreSQL instance.
+2. Make the RDS instance accessible from the application environment through the appropriate VPC and security group configuration.
+3. Restore `backups/sportszone.dump` into an empty RDS database from an EC2 instance or another machine with network access to RDS.
+4. Configure the Django database environment variables to use the RDS endpoint and credentials.
+
+Example restore command for RDS:
+
+```bash
+pg_restore -h <RDS-ENDPOINT> -p 5432 -U <DB_USER> -d <DB_NAME> --no-owner --no-privileges backups/sportszone.dump
+```
+
+Use the appropriate RDS connection and SSL settings.
+
+## Deployment Handover
+
+The application is Dockerized and ready for the next deployment phase.
+
+The deployment team will continue with:
+
+- AWS infrastructure on EC2.
+- Amazon RDS for the production database.
+- Jenkins CI/CD pipeline.
+- Kubernetes deployment.
+
+**Note:** The PostgreSQL container in Docker Compose is intended for local development only. Production deployment must connect to Amazon RDS through environment variables.

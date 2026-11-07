@@ -1,0 +1,8 @@
+Django==4.2.7
+djangorestframework
+django-cors-headers
+djangorestframework-simplejwt
+psycopg2-binary
+Pillow
+gunicorn==23.0.0
+whitenoise==6.9.0
